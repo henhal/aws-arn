@@ -1,4 +1,8 @@
 # aws-arn
+
+[![NPM version](https://img.shields.io/npm/v/aws-arn.svg)](https://www.npmjs.com/package/aws-arn)
+[![Build Status](https://travis-ci.com/henhal/aws-arn.svg?branch=master)](https://travis-ci.com/henhal/aws-arn)
+
 Parser/utils for AWS ARN:s.
 
 This module provides a simple AWS ARN parser.
