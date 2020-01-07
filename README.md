@@ -7,12 +7,27 @@ Parser/utils for AWS ARN:s.
 
 This module provides a simple AWS ARN parser.
 
-Usage:
+## Installation
 
-### Parse an ARN string
+### Node.JS:
+
+```
+npm install aws-arn
+```
+
+Then within the application do
+
 ```
 const Arn = require('aws-arn');
 
+```
+
+## Usage
+
+### 
+
+### Parse an ARN string
+```
 const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
 
 console.log(arn);
@@ -26,7 +41,7 @@ console.log(arn);
     resourcePart: 'bucket/path/object' }
 ```
 
-Since the resource part of ARNs may have several formats, Arn objects also supply a resource property that returns a parsed representation of the resource part:
+Since the resource part of ARNs may have several formats, Arn objects also supply a read-only `resource` property that returns a parsed representation of the resource part:
 
 ```  
 const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
