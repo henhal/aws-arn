@@ -29,8 +29,22 @@ import Arn from 'aws-arn';
 ### 
 
 ### Parse an ARN string
+
+> NOTE: V1 always returned `null` if attempting to parse invalid ARNs. 
+> V2 however supports passing a second argument `fail` with the value `true` to instead throw an error. 
+> This avoids having to deal with the return type `Arn | null`, which simplifies TypeScript usage:
+> ```
+> const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
+> // arn is of type Arn | null
+>
+> const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object', false);
+> // arn is of type Arn | null
+> 
+> const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object', true);
+> // arn is of type Arn, or the call threw an error
+> ```
 ```
-const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
+const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object', true);
 
 console.log(arn);
 
@@ -46,12 +60,12 @@ console.log(arn);
 Since the resource part of ARNs may have several formats, Arn objects also supply a read-only `resource` property that returns a parsed representation of the resource part:
 
 ```  
-const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
+const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object', true);
 console.log(arn.resource);
 
 > { type: 'bucket', id: 'path/object'}
 
-const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42');
+const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42', true);
 console.log(arn.resource);
 
 > { type: 'Layer', id: 'my-layer', qualifier: '42'}
@@ -81,7 +95,7 @@ console.log(arn);
 ### Format ARN into string
 
 ```
-const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object');
+const arn = Arn.parse('aws:arn:s3:eu-west-1:123456789:bucket/path/object', true);
 
 console.log(arn.format());
 

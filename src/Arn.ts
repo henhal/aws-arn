@@ -1,18 +1,39 @@
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
+/**
+ * A parsed ARN resource.
+ * Resources can consist of only an ID or a type, an ID and an optional qualifier:
+ * arn:partition:service:region:account-id:resource-id
+ * arn:partition:service:region:account-id:resource-type/resource-id
+ * arn:partition:service:region:account-id:resource-type:resource-id
+ */
 export interface ArnResource {
   id: string;
   type?: string;
   qualifier?: string;
 }
 
+/**
+ * The components of a parsed ARN
+ */
 export interface ArnComponents {
-  scheme?: string;
-  partition?: string;
+  scheme: string;
+  partition: string;
   service: string;
   region: string;
   accountId: string;
   resourcePart: string
+}
+
+/**
+ * Error thrown when attempting to parse invalid ARNs
+ */
+export class InvalidArnError extends Error {
+  constructor (
+      message = 'ARN must be a string on the form scheme:partition:service:region:accountId:resourcePart'
+  ) {
+    super(message);
+  }
 }
 
 function parseResourcePart(resourcePart: string): ArnResource {
@@ -25,6 +46,13 @@ function parseResourcePart(resourcePart: string): ArnResource {
   }
 
   return {id: resourcePart};
+}
+
+function invalidArn(fail = false, message?: string) {
+  if (fail) {
+    throw new InvalidArnError(message);
+  }
+  return null;
 }
 
 /**
@@ -61,7 +89,7 @@ function parseResourcePart(resourcePart: string): ArnResource {
  *
  * https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
  */
-export default class Arn implements ArnComponents {
+class Arn implements ArnComponents {
   readonly scheme: string;
   readonly partition: string;
   readonly service: string;
@@ -71,20 +99,32 @@ export default class Arn implements ArnComponents {
 
   /**
    * Parse an ARN string into an Arn object
-   * @param {string} s ARN string
+   * @param s ARN string
+   * @param [fail] Whether to throw instead of returning null
    * @returns {null|Arn} An Arn object, or null if the argument was invalid
    */
-  static parse(s: string): Arn | null {
+  static parse(s: string, fail?: false): Arn | null;
+
+  /**
+   * Parse an ARN string into an Arn object, throwing an error if invalid
+   * @param s ARN string
+   * @param fail Whether to throw instead of returning null
+   * @returns {Arn} An Arn object
+   * @throws Error
+   */
+  static parse(s: string, fail: true): Arn;
+
+  static parse(s: string, fail = false): Arn | null {
     // noinspection SuspiciousTypeOfGuard
     if (typeof s !== 'string') {
-      return null;
+      return invalidArn(fail);
     }
 
     const [scheme, partition, service, region, accountId, ...resourceParts] = s.split(':');
     const resourcePart = resourceParts.join(':');
 
     if (!resourcePart) {
-      return null;
+      return invalidArn(fail);
     }
 
     return new Arn({
@@ -100,13 +140,13 @@ export default class Arn implements ArnComponents {
   /**
    * Create an Arn object from ARN components
    *
-   * @param {object} components ARN components object
-   * @param {string} [components.scheme=aws] Scheme
-   * @param {string} [components.partition=arn] Partition
-   * @param {string} components.service Service
-   * @param {string} components.region Region
-   * @param {string} components.accountId Account ID
-   * @param {string} components.resourcePart Resource part
+   * @param components ARN components object
+   * @param [components.scheme=aws] Scheme
+   * @param [components.partition=arn] Partition
+   * @param components.service Service
+   * @param components.region Region
+   * @param components.accountId Account ID
+   * @param components.resourcePart Resource part
    */
   constructor(
       {
@@ -128,7 +168,7 @@ export default class Arn implements ArnComponents {
   /**
    * Get a parsed representation of the resource part. Note that this property cannot be mutated, but if
    * resourcePart is mutated, resource will reflect the change.
-   * @returns {{[type], id, [qualifier]}}
+   * @returns ArnResource
    */
   get resource(): ArnResource {
     return parseResourcePart(this.resourcePart);
@@ -136,7 +176,7 @@ export default class Arn implements ArnComponents {
 
   /**
    * Format this Arn object into an ARN string.
-   * @returns {string}
+   * @returns string
    */
   format(): string {
     const {scheme, partition, service, region, accountId, resourcePart} = this;
@@ -149,3 +189,4 @@ export default class Arn implements ArnComponents {
   }
 }
 
+export default Arn;

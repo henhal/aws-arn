@@ -5,7 +5,7 @@ import Arn from '../src/Arn';
 describe('ARN tests', () => {
   it('should parse an ARN with a / separated resource part', () => {
     const s = 'aws:arn:s3:eu-west-1:123456789:bucket/path/object';
-    const arn = Arn.parse(s) || expect.fail('Could not parse ARN');
+    const arn = Arn.parse(s, true);
 
     expect(arn).to.eql({
       scheme: 'aws',
@@ -27,7 +27,7 @@ describe('ARN tests', () => {
 
   it('should parse an ARN with a : separated resource part', () => {
     const s = 'aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42';
-    const arn = Arn.parse(s) || expect.fail('Could not parse ARN');
+    const arn = Arn.parse(s, true);
 
     expect(arn).to.eql({
       scheme: 'aws',
@@ -87,6 +87,15 @@ describe('ARN tests', () => {
 
   it('should return null if attempting to parse an incomplete ARN', () => {
     expect(Arn.parse('aws:arn:lambda:eu-west-1:123456789:')).to.be.null;
+    expect(Arn.parse('aws:arn:lambda:eu-west-1:123456789:', false)).to.be.null;
+  });
+
+  it('should return null if attempting to parse an incomplete ARN with fail=false', () => {
+    expect(Arn.parse('aws:arn:lambda:eu-west-1:123456789:', false)).to.be.null;
+  });
+
+  it('should throw if attempting to parse an incomplete ARN with fail=true', () => {
+    expect(() => Arn.parse('aws:arn:lambda:eu-west-1:123456789:', true)).to.throw();
   });
 
   it('should return null if attempting to parse an invalid ARN', () => {
