@@ -17,11 +17,29 @@ export interface ArnResource {
  * The components of a parsed ARN
  */
 export interface ArnComponents {
+  /**
+   * Scheme, e.g. "arn"
+   */
   scheme: string;
+  /**
+   * Partition, e.g. "aws" or "aws-cn"
+   */
   partition: string;
+  /**
+   * Service, e.g. "dynamodb"
+   */
   service: string;
+  /**
+   * Region, e.g. "us-west-1"
+   */
   region: string;
+  /**
+   * Account ID, e.g. "123456789"
+   */
   accountId: string;
+  /**
+   * Resource, e.g. "my_bucket/my_key" or "layer:my_layer:42"
+   */
   resourcePart: string
 }
 
@@ -54,6 +72,8 @@ function invalidArn(fail = false, message?: string) {
   }
   return null;
 }
+
+export type ArnInput = Optional<ArnComponents, 'scheme' | 'partition'>;
 
 /**
  * Amazon Resource Names (ARNs) uniquely identify AWS resources.
@@ -140,7 +160,7 @@ class Arn implements ArnComponents {
   /**
    * Create an Arn object from ARN components
    *
-   * @param components ARN components object
+   * @param components ARN components object (scheme and partition are optional)
    * @param [components.scheme=aws] Scheme
    * @param [components.partition=arn] Partition
    * @param components.service Service
@@ -156,7 +176,7 @@ class Arn implements ArnComponents {
         region,
         accountId,
         resourcePart
-      }: Optional<ArnComponents, 'scheme' | 'partition'>) {
+      }: ArnInput) {
     this.scheme = scheme;
     this.partition = partition;
     this.service = service;
