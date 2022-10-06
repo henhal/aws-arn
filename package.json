@@ -1,6 +1,6 @@
 {
   "name": "aws-arn",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "AWS ARN parser/utils",
   "main": "dist/Arn.js",
   "types": "dist/Arn.d.ts",
