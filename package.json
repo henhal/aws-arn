@@ -15,6 +15,7 @@
     "@types/chai": "^4.3.3",
     "@types/mocha": "^10.0.0",
     "chai": "^4.2.0",
+    "gh-pages": "^4.0.0",
     "mocha": "^10.0.0",
     "ts-mocha": "^10.0.0",
     "typedoc": "^0.23.15",
@@ -24,7 +25,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "docs": "npx typedoc --out docs src/Arn.ts ",
+    "docs": "npx typedoc --out docs src/Arn.ts",
+    "postpublish": "npm run docs && gh-pages -d docs",
     "prepack": "npm run clean && npm run build",
     "test": "ts-mocha test/*.test.ts"
   },

@@ -24,6 +24,10 @@ import Arn from 'aws-arn';
 
 ```
 
+## API reference
+
+https://henhal.github.io/aws-arn/
+
 ## Usage
 
 ### 
