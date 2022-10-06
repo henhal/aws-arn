@@ -7,6 +7,8 @@ Parser/utils for AWS ARN:s.
 
 This module provides a simple AWS ARN parser.
 
+Note: v2.0.0 rewritten in TypeScript
+
 ## Installation
 
 ### Node.JS:
@@ -18,7 +20,7 @@ npm install aws-arn
 Then within the application do
 
 ```
-const Arn = require('aws-arn');
+import Arn from 'aws-arn';
 
 ```
 
