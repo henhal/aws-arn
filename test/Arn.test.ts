@@ -1,10 +1,11 @@
-const Arn = require('../Arn');
-const {expect} = require('chai');
+import {expect} from 'chai';
+
+import Arn from '../src/Arn';
 
 describe('ARN tests', () => {
   it('should parse an ARN with a / separated resource part', () => {
     const s = 'aws:arn:s3:eu-west-1:123456789:bucket/path/object';
-    const arn = Arn.parse(s);
+    const arn = Arn.parse(s) || expect.fail('Could not parse ARN');
 
     expect(arn).to.eql({
       scheme: 'aws',
@@ -26,7 +27,7 @@ describe('ARN tests', () => {
 
   it('should parse an ARN with a : separated resource part', () => {
     const s = 'aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42';
-    const arn = Arn.parse(s);
+    const arn = Arn.parse(s) || expect.fail('Could not parse ARN');
 
     expect(arn).to.eql({
       scheme: 'aws',
@@ -47,7 +48,8 @@ describe('ARN tests', () => {
   });
 
   it('should keep the parsed resource in sync if mutating resourcePart', () => {
-    const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42');
+    const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42') ||
+        expect.fail('Could not parse ARN');
 
     arn.resourcePart = `${arn.resource.type}:${arn.resource.id}:43`;
 
@@ -62,9 +64,16 @@ describe('ARN tests', () => {
   });
 
   it('should not allow mutating the parsed resource', () => {
-    const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42');
+    const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42') ||
+        expect.fail('Could not parse ARN');
 
-    arn.resource = {type: 'foo', id: 'bar', qualifier: 'baz'};
+    // This test case isn't really useful anymore since TS won't allow mutating a get-only field, and adding a
+    // no-op setter seems contraproductive, so in order not to remove the test completely, we simply
+    // expect this call to throw, and then expect the properties to be unchanged. ¯\_(ツ)_/¯
+    expect(() => {
+      // @ts-ignore
+      arn.resource = {type: 'foo', id: 'bar', qualifier: 'baz'};
+    }).to.throw();
 
     expect(arn.resourcePart).to.eql('Layer:my-layer:42');
     expect(arn.resource).to.eql({
@@ -82,8 +91,9 @@ describe('ARN tests', () => {
 
   it('should return null if attempting to parse an invalid ARN', () => {
     expect(Arn.parse('')).to.be.null;
-    expect(Arn.parse(42)).to.be.null;
-    expect(Arn.parse(null)).to.be.null;
+    expect(Arn.parse(42 as any)).to.be.null;
+    expect(Arn.parse(null as any)).to.be.null;
+    // @ts-ignore
     expect(Arn.parse()).to.be.null;
   });
 });

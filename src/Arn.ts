@@ -1,4 +1,21 @@
-function parseResourcePart(resourcePart) {
+type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export interface ArnResource {
+  id: string;
+  type?: string;
+  qualifier?: string;
+}
+
+export interface ArnComponents {
+  scheme?: string;
+  partition?: string;
+  service: string;
+  region: string;
+  accountId: string;
+  resourcePart: string
+}
+
+function parseResourcePart(resourcePart: string): ArnResource {
   const parts = resourcePart.match(/^([^:/]+)\/(.+)$/) || resourcePart.match(/^(.+?):(.+?):(.+)$/);
 
   if (parts) {
@@ -44,13 +61,21 @@ function parseResourcePart(resourcePart) {
  *
  * https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
  */
-class Arn {
+export default class Arn implements ArnComponents {
+  readonly scheme: string;
+  readonly partition: string;
+  readonly service: string;
+  readonly region: string;
+  readonly accountId: string;
+  resourcePart: string;
+
   /**
    * Parse an ARN string into an Arn object
    * @param {string} s ARN string
    * @returns {null|Arn} An Arn object, or null if the argument was invalid
    */
-  static parse(s) {
+  static parse(s: string): Arn | null {
+    // noinspection SuspiciousTypeOfGuard
     if (typeof s !== 'string') {
       return null;
     }
@@ -83,10 +108,21 @@ class Arn {
    * @param {string} components.accountId Account ID
    * @param {string} components.resourcePart Resource part
    */
-  constructor({scheme = 'aws', partition = 'arn', service, region, accountId, resourcePart}) {
-    Object.assign(this, {
-      scheme, partition, service, region, accountId, resourcePart
-    });
+  constructor(
+      {
+        scheme = 'aws',
+        partition = 'arn',
+        service,
+        region,
+        accountId,
+        resourcePart
+      }: Optional<ArnComponents, 'scheme' | 'partition'>) {
+    this.scheme = scheme;
+    this.partition = partition;
+    this.service = service;
+    this.region = region;
+    this.accountId = accountId;
+    this.resourcePart = resourcePart;
   }
 
   /**
@@ -94,7 +130,7 @@ class Arn {
    * resourcePart is mutated, resource will reflect the change.
    * @returns {{[type], id, [qualifier]}}
    */
-  get resource() {
+  get resource(): ArnResource {
     return parseResourcePart(this.resourcePart);
   }
 
@@ -102,15 +138,14 @@ class Arn {
    * Format this Arn object into an ARN string.
    * @returns {string}
    */
-  format() {
+  format(): string {
     const {scheme, partition, service, region, accountId, resourcePart} = this;
 
     return [scheme, partition, service, region, accountId, resourcePart].join(':');
   }
 
-  toString() {
+  toString(): string {
     return this.format();
   }
 }
 
-module.exports = Arn;
