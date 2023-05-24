@@ -47,6 +47,28 @@ describe('ARN tests', () => {
     expect(arn.format()).to.eql(s);
   });
 
+  it('should parse an ARN with a : separated resource part without a qualifier', () => {
+    const s = 'aws:arn:lambda:eu-west-1:123456789:function:my-function-name';
+    const arn = Arn.parse(s, true);
+
+    expect(arn).to.eql({
+      scheme: 'aws',
+      partition: 'arn',
+      service: 'lambda',
+      region: 'eu-west-1',
+      accountId: '123456789',
+      resourcePart: 'function:my-function-name'
+    });
+
+    expect(arn.resource).to.eql({
+      type: 'function',
+      id: 'my-function-name',
+      qualifier: undefined,
+    });
+
+    expect(arn.format()).to.eql(s);
+  });
+
   it('should keep the parsed resource in sync if mutating resourcePart', () => {
     const arn = Arn.parse('aws:arn:lambda:eu-west-1:123456789:Layer:my-layer:42') ||
         expect.fail('Could not parse ARN');
