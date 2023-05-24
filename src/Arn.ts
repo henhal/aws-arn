@@ -55,7 +55,7 @@ export class InvalidArnError extends Error {
 }
 
 function parseResourcePart(resourcePart: string): ArnResource {
-  const parts = resourcePart.match(/^(.+?):(.+?):(.+)$/) || resourcePart.match(/^([^:\/]+)[\/|:](.+)$/);
+  const parts = resourcePart.match(/^(.+?):(.+?):(.+)$/) || resourcePart.match(/^([^:\/]+)[\/:](.+)$/);
 
   if (parts) {
     const [, type, id, qualifier] = parts;
